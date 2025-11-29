@@ -1,154 +1,185 @@
-# VB Telemetry for EdgeTX (RadioMaster Pocket)
+# VB Telemetry for EdgeTX (128×64 Monochrome ELRS Radios)
 
-VB Telemetry is a custom Lua telemetry suite for **RadioMaster Pocket** transmitters running **EdgeTX** with a 128×64 B/W screen.
+[![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
+[![Telegram](https://img.shields.io/badge/Telegram-VBtelemetry-blue?logo=telegram)](https://t.me/VBtelemetry)
+[![Monobank](https://img.shields.io/badge/Donate-Monobank-black?style=flat)](https://send.monobank.ua/jar/7VF9b8mPJj)
+[![Patreon](https://img.shields.io/badge/Support-Patreon-orange?logo=patreon)](https://patreon.com/VBtelemetry)
 
-It adds rich, optimized telemetry screens for FPV quads, including:
-- Main flight screen with dynamic bars and battery icons
-- Advanced GPS screen with home indicator, relative altitude, distance and compass
-- Statistics screen (total flights, time in air, distance, etc.)
-- GPX tracks recorder
-- Info / Donate screen with QR codes (GitHub, Telegram, donations)
+---
 
-The project focuses on:
-- **Memory optimization** (safe for Pocket)
-- **Readability** – clear layout and fonts
-- **Ease of use** with logical navigation
+## Project Description
+
+**VB Telemetry** is an optimized set of Lua telemetry screens for EdgeTX radios with a **128×64 monochrome display**.  
+The script is designed for **ELRS** and provides maximum situational awareness even in poor visibility, weak video signal, or full “blind flying” when flying in stabilization mode.
 
 ---
 
 ## Features
 
-- **Main telemetry screen**
-  - Voltage bars for quad and radio
-  - Timers, model name, RSSI/LQ, sats, speed, altitude
-  - Invert UI mode (light/dark) with proper element inversion
+### 1. Main Telemetry Screen
 
-- **GPS screen (VB GPS)**
-  - Home arrow
-  - Relative distance and altitude
-  - Compass with cardinal directions
-  - Coordinates and QR sharing (future)
+- Drone and radio voltage bars.
+- ELRS indicators:
+  - small outer antennas — **Link Quality (LQ)**;
+  - larger antennas — **output power (dBm)**.
+- Signal direction:
+  - **left** → uplink (radio → drone)
+  - **right** → downlink (drone → radio)
+- Flight mode, GPS data, voltage, timers — all received from ELRS telemetry.
+- ARM / DISARM / TURTLE / BEEP states come from EdgeTX switches.
 
-- **Statistics screen**
-  - Total distance
-  - Total flight time
-  - Number of flights
-  - Milestone notifications (every X km / minutes / flights)
-
-- **GPX Tracks**
-  - Logs telemetry fields into `.gpx` files
-  - Stored under:
-    ```
-    /LOGS/VB_GPX
-    ```
-  - If the folder does not exist, create it manually.
-
-- **Info / Donate screen**
-  - Script version
-  - GitHub QR
-  - Telegram QR
-  - Donate submenu (Monobank, Ko-fi in future)
-
-- **Invert UI**
-  - Global light/dark toggle
-  - Proper inversion for bars, headers, icons
+<img width="256" height="128" alt="Main Screen" src="https://github.com/user-attachments/assets/914708c7-aa92-4faa-bbbb-266e6560ee6f" />
 
 ---
 
-## Requirements
+### 2. GPS Screen
 
-- **RadioMaster Pocket**
-- **EdgeTX**
-- Display: **128×64 monochrome**
-- Lua scripts enabled
+- Accurate “Home” arrow with real azimuth.
+- Distance to Home.
+- Absolute altitude: **MSL** (*shown as SL*).
+- Relative altitude: **AGL** (*shown as AG*).
+- Speed, satellites, coordinates.
+- Supports metric & imperial.
 
-Other radios with the same screen may work, but only Pocket is officially tested.
-
----
-
-## Installation
-
-1. Download the latest release ZIP from the [Releases](../../releases) page  
-   (for example: `VBtelemetry_v1.4.zip`).
-
-2. Unzip the archive and copy folders to your SD card, preserving paths:
-
-    ```text
-    /SCRIPTS/TELEMETRY/VBmain.lua
-    /SCRIPTS/TELEMETRY/VBgps.lua
-    /SCRIPTS/TELEMETRY/VBlib/...
-    ```
-
-3. In EdgeTX:
-    - Open your **model settings**
-    - Go to the **Telemetry** tab
-    - Assign `VBmain.lua` as a telemetry script (page)
-    - Optionally bind `VBgps.lua` as a second GPS-oriented screen
-
-4. Reboot the radio or reload scripts and open the telemetry pages.
+<img width="256" height="128" alt="GPS Screen" src="https://github.com/user-attachments/assets/d7915a7a-81fe-445f-b043-3cc173fab2de" />
 
 ---
 
-## Basic usage
+### 3. QR Code Generator
 
-- Use the **main screen** for most flights.
-- Switch to the **GPS screen** when flying far or high.
-- The **statistics screen** shows:
-  - total flights,
-  - time in the air,
-  - distance flown.
-- GPX tracks:
-  - Start automatically on arm (depending on settings).
-  - Saved to `/LOGS/VB_GPX`.
+- Instant QR generation.
+- Supports location links & coordinates.
+
+<img width="256" height="128" alt="QR Screen" src="https://github.com/user-attachments/assets/b6ef63f3-9960-446e-9d39-cd115cffdf7e" />
 
 ---
 
-## Telegram
+### 4. Blind-Flying Capability (no RTH required)
 
-Join the official Telegram channel  
-**https://t.me/VBtelemetry**  
-for:
-- updates  
-- beta versions  
-- help  
-- news  
+VB Telemetry allows safe navigation **even with no FPV video**, e.g.:
+
+- during video loss,
+- in stabilization mode,
+- in fog, dusk, or poor visibility.
+
+Always visible:
+- home direction,
+- distance to home,
+- relative altitude,
+- speed and GPS vector.
 
 ---
 
-## Donate
+### 5. Flight Statistics
 
-Support development:
+- Total flights  
+- Total distance  
+- Total time in the air  
+- Updated automatically
 
-**Monobank (UA):**  
+<img width="256" height="128" alt="Statistics" src="https://github.com/user-attachments/assets/b6d59573-a6b6-49d3-a400-365c0273769e" />
+
+---
+
+### 6. GPX Logging
+
+- Logs telemetry into `.gpx` files:
+  `relAlt, GSpd, RxBt, 1RSS, 2RSS, TRSS, RQly, TQly, TPWR, Sats`
+- Saved to:
+
+  ```
+  /LOGS/VB_GPX
+  ```
+
+- Create the folder manually if missing.
+- Starts logging **on first ARM (Home lock)**  
+  and stops **when Home is reset**.
+
+#### Resetting Home
+
+- Select **Reset Home** in script settings  
+- Replace drone battery  
+- Reboot the radio  
+
+---
+
+## Supported Radios
+
+VB Telemetry supports radios with:
+
+- **128×64 monochrome display**
+- **EdgeTX firmware**
+- **ELRS internal/external module**
+
+### For inverted OLED screens:
+Enable **Invert UI** in script settings.
+
+---
+
+## How to Enable the Script in EdgeTX
+
+1. Open **Model Menu**  
+2. Go to **DISPLAY**  
+3. Under **Screen 1 / 2 / 3**, select:
+   - **Script**
+   - **VBmain.luac**
+4. Optionally assign:
+   - **VBgps.luac** to another screen
+
+<img width="256" height="128" alt="Display Setup" src="https://github.com/user-attachments/assets/550351f3-3d66-4e2c-9f15-5415c2515f73" />
+
+---
+
+## Timers
+
+Configure timers on the **SETUP** page of the model.
+
+<img width="256" height="128" alt="Timers" src="https://github.com/user-attachments/assets/fe4a465a-3da7-482a-9c8f-fdb40bf437f9" />
+
+---
+
+## Restrictions & Usage Policy
+
+**Important:**  
+The script is strictly prohibited for launching drones **from**:
+
+- russia  
+- belarus  
+- iran  
+- north korea  
+- temporarily occupied territories of Ukraine  
+
+Using the script **from other territories** while flying *toward these areas* is not technically restricted.  
+This reflects the author's ethical stance.  
+The author assumes no responsibility for misuse.
+
+---
+
+## Support the Project
+
+If VB Telemetry helps you and you want to support further development, choose one of the options below.
+
+### 🇺🇦 For users in Ukraine (Monobank)
+Monobank accepts donations **only from Ukrainian bank cards**.
+
 https://send.monobank.ua/jar/7VF9b8mPJj
 
-International options will be added soon.
+[![Monobank](https://img.shields.io/badge/Donate-Monobank-black?style=for-the-badge)](https://send.monobank.ua/jar/7VF9b8mPJj)
 
 ---
 
-## Roadmap
+### 🌍 For international supporters (Patreon)
 
-Planned improvements:
+Patreon works worldwide and supports all major payment methods.
 
-- Better no-fly alerts
-- More GPS tools
-- Expanded statistics
-- Activation system for PRO features
-- Advanced QR tools
-- More optimization
+https://patreon.com/VBtelemetry
+
+[![Patreon](https://img.shields.io/badge/Support-Patreon-orange?style=for-the-badge&logo=patreon)](https://patreon.com/VBtelemetry)
 
 ---
 
-## License
+## Summary
 
-Released under the **MIT License**.  
-See the `LICENSE` file.
+**VB Telemetry** is a complete, high-performance telemetry toolkit for EdgeTX monochrome radios:  
+main screen, GPS navigation, statistics, GPX logging, QR generator, and full blind-flying capability.
 
----
-
-## Short summary (UA)
-
-**VB Telemetry** — це комплект Lua-екранів телеметрії для RadioMaster Pocket:  
-основний екран, GPS, статистика, GPX-треки та меню інформації/донату.
-
-Докладний опис — вище.
