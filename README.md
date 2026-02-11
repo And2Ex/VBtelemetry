@@ -183,3 +183,4 @@ https://patreon.com/VBtelemetry
 **VB Telemetry** is a complete, high-performance telemetry toolkit for EdgeTX monochrome radios:  
 main screen, GPS navigation, statistics, GPX logging, QR generator, and full blind-flying capability.
 
+[DOWNLOAD](https://github.com/And2Ex/VBtelemetry/releases/tag/v26.02.11-beta)
