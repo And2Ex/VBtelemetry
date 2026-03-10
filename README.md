@@ -267,7 +267,7 @@ This is a hardware limitation of small radios.
 
 ## Installation
 
-Copy the script files to SD root.
+Extract the contents of the archive to the root of the SD card.
 
 ---
 
@@ -279,9 +279,7 @@ Copy the script files to SD root.
 3. Select a screen
 4. Choose:
    - **Type:** Script
-   - **Script:** `VBmain.luac`
-
-Optionally assign `VBgps.luac` to another screen.
+   - **Script:** `VBtlm`
 
 ---
 
