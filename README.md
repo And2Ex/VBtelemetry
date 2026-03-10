@@ -7,93 +7,157 @@
 
 ---
 
-## Project Description
+## Overview
 
-**VB Telemetry** is an optimized set of Lua telemetry screens for EdgeTX radios with a **128×64 monochrome display**.  
-The script is designed for **ELRS** and provides maximum situational awareness even in poor visibility, weak video signal, or full “blind flying” when flying in stabilization mode.
+**VB Telemetry** is a Lua telemetry suite for **EdgeTX radios with a 128×64 monochrome display** and **ELRS telemetry** support.
+
+It provides compact and readable flight telemetry designed specifically for small monochrome radio screens.
+
+The interface focuses on:
+
+- quick readability  
+- GPS navigation  
+- blind-flying support  
+- minimal screen clutter  
+- statistics and GPX logging  
 
 ---
 
-## Features
+## Beta Status
+
+**Important:** this is a **beta build**.
+
+The script **has not been tested on real drones by the author**, because the author currently does not have drones available for live testing.
+
+Development and verification were done only on the radio and Lua script side.
+
+Because of this:
+
+- use it at your own risk  
+- expect possible bugs or telemetry edge cases  
+- verify all functions carefully before real flight  
+
+---
+
+## Main Features
 
 ### 1. Main Telemetry Screen
+<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/022a98c2-4926-4b94-96f1-8dadee11f62a" />
 
-- Drone and radio voltage bars.
-- ELRS indicators:
-  - small outer antennas — **Link Quality (LQ)**;
-  - larger antennas — **output power (dBm)**.
-- Signal direction:
-  - **left** → uplink (radio → drone)
-  - **right** → downlink (drone → radio)
-- Flight mode, GPS data, voltage, timers — all received from ELRS telemetry.
-- ARM / DISARM / TURTLE / BEEP states come from EdgeTX switches.
+The main screen provides the most important flight data in a compact layout.
 
-<img width="256" height="128" alt="Main Screen" src="https://github.com/user-attachments/assets/914708c7-aa92-4faa-bbbb-266e6560ee6f" />
+Displayed data includes:
+
+- model name  
+- radio battery voltage  
+- drone battery bar  
+- ELRS packet rate or RF mode  
+- ARM / DISARM state  
+- flight mode  
+- timers  
+- uplink and downlink signal blocks  
+- transmit power  
+- Link Quality indicators  
+
+Signal direction is separated:
+
+- **left side** — radio → drone  
+- **right side** — drone → radio  
+
+ARM, TURTLE and BEEPER states are read from EdgeTX switches.
 
 ---
 
 ### 2. GPS Screen
+<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/e314b506-a974-4443-8939-a003fdfdfcd5" />
 
-- Accurate “Home” arrow with real azimuth.
-- Distance to Home.
-- Absolute altitude: **MSL** (*shown as SL*).
-- Relative altitude: **AGL** (*shown as AG*).
-- Speed, satellites, coordinates.
-- Supports metric & imperial.
+The GPS screen focuses on navigation.
 
-<img width="256" height="128" alt="GPS Screen" src="https://github.com/user-attachments/assets/d7915a7a-81fe-445f-b043-3cc173fab2de" />
+It displays:
 
----
+- **Home direction arrow**
+- distance to Home  
+- absolute altitude (**SL**)  
+- relative altitude (**AG**)  
+- GPS speed  
+- satellites count  
+- live coordinates  
 
-### 3. QR Code Generator
+Even without video feed the pilot can still see:
 
-- Instant QR generation.
-- Supports location links & coordinates.
+- where Home is  
+- how far the drone is  
+- current altitude  
+- movement speed  
 
-<img width="256" height="128" alt="QR Screen" src="https://github.com/user-attachments/assets/b6ef63f3-9960-446e-9d39-cd115cffdf7e" />
+Supports:
 
----
-
-### 4. Blind-Flying Capability (no RTH required)
-
-VB Telemetry allows safe navigation **even with no FPV video**, e.g.:
-
-- during video loss,
-- in stabilization mode,
-- in fog, dusk, or poor visibility.
-
-Always visible:
-- home direction,
-- distance to home,
-- relative altitude,
-- speed and GPS vector.
+- **Metric**
+- **Imperial**
 
 ---
 
-### 5. Flight Statistics
+### 3. Coordinates QR Screen
+<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/b1ed967c-edde-44be-b890-b5fa37bd68e4" />
 
-- Total flights  
-- Total distance  
-- Total time in the air  
-- Updated automatically
+The script can generate a QR code from current coordinates.
 
-<img width="256" height="128" alt="Statistics" src="https://github.com/user-attachments/assets/b6d59573-a6b6-49d3-a400-365c0273769e" />
+This allows:
+
+- quickly sharing the location  
+- opening coordinates on a phone  
+- sending recovery position  
+- saving drone location  
+
+Latitude and longitude are also displayed as text.
 
 ---
 
-### 6. GPX Logging
+### 4. Flight Statistics Screen
+<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/1a03f54e-5161-4c13-bb9e-efed549bd702" />
 
-- Logs telemetry into `.gpx` files:
-  `relAlt, GSpd, RxBt, 1RSS, 2RSS, TRSS, RQly, TQly, TPWR, Sats`
-- Saved to:
+The statistics page stores and displays flight results.
 
-  ```
-  /LOGS/VB_GPX
-  ```
+Tracked values include:
 
-- Create the folder manually if missing.
-- Starts logging **on first ARM (Home lock)**  
-  and stops **when Home is reset**.
+- last flight time  
+- total flight time  
+- last maximum altitude  
+- total maximum altitude  
+- last maximum distance  
+- total maximum distance  
+- last maximum speed  
+- total maximum speed  
+- number of arms  
+- total flights  
+
+Both **Last** and **Total** values are displayed.
+
+---
+
+### 5. GPX Logging
+
+VB Telemetry can record telemetry data into GPX tracks.
+
+Tracks are saved to:
+
+`/LOGS/VB_GPX`
+
+If this folder does not exist, create it manually.
+
+GPX logging is intended for post-flight review and route analysis.
+
+Logged values may include:
+
+- relative altitude  
+- GPS speed  
+- radio battery voltage  
+- RSS values  
+- link quality  
+- transmit power  
+- satellites count  
+
+Logging starts on first ARM after Home is established and stops when Home is reset.
 
 #### Resetting Home
 
@@ -103,84 +167,187 @@ Always visible:
 
 ---
 
-## Supported Radios
+### 6. Blind-Flying Support
 
-VB Telemetry supports radios with:
+The script allows navigation even without FPV video.
 
-- **128×64 monochrome display**
-- **EdgeTX firmware**
-- **ELRS internal/external module**
+This can help during:
 
-### For inverted OLED screens:
-Enable **Invert UI** in script settings.
+- video signal loss  
+- fog  
+- poor visibility  
+- dusk  
+- stabilization-mode flight  
+
+Telemetry still shows:
+
+- home direction  
+- distance to home  
+- altitude  
+- speed  
+
+This **does not replace** failsafe systems or safe flight procedures.
 
 ---
 
-## How to Enable the Script in EdgeTX
+### 7. Quick Screen Switching
 
-1. Open **Model Menu**  
-2. Go to **DISPLAY**  
-3. Under **Screen 1 / 2 / 3**, select:
-   - **Script**
-   - **VBmain.luac**
-4. Optionally assign:
-   - **VBgps.luac** to another screen
+The script allows fast switching between telemetry screens.
 
-<img width="256" height="128" alt="Display Setup" src="https://github.com/user-attachments/assets/550351f3-3d66-4e2c-9f15-5415c2515f73" />
+To switch screens quickly:
+
+```
+Double press ENTER
+```
+
+Pressing **ENTER twice quickly** toggles between available telemetry screens.
+
+---
+
+### 8. Quick Menu
+
+The script includes an internal menu for quick navigation.
+
+Menu items include:
+
+- main screen  
+- reset Home point  
+- coordinates QR  
+- statistics  
+- GPX tracks  
+- info page  
+- settings  
+
+---
+
+### 9. Script Settings
+<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/c3c3c875-94db-4656-b0ec-86aff7f7a85c" />
+
+The settings page allows configuration of:
+
+- **Arm switch**  
+- **Turtle switch**  
+- **Beeper switch**  
+- **Units**  
+- **Invert UI**
+
+For radios with inverted OLED displays you can enable **Invert UI** so the interface is rendered correctly.
+
+---
+
+## Supported Hardware
+
+VB Telemetry is designed for radios with:
+
+- **EdgeTX firmware**
+- **128×64 monochrome display**
+- **ELRS internal or external module**
+
+---
+
+## Memory and RAM Limitations
+
+EdgeTX monochrome radios have very limited Lua memory.
+
+Because of this, some features require enough free RAM.
+
+These features include:
+
+- **Statistics**
+- **GPX logging**
+
+If RAM is insufficient:
+
+- the main telemetry screen may still work  
+- statistics or GPX logging may not function  
+
+This is a hardware limitation of small radios.
+
+---
+
+## Installation
+
+Copy the script files to SD root.
+
+---
+
+## Enabling the Script in EdgeTX
+<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/455a8fe7-88a6-46b5-8460-bf37ba157902" />
+
+1. Open **Model Menu**
+2. Go to **DISPLAY**
+3. Select a screen
+4. Choose:
+   - **Type:** Script
+   - **Script:** `VBmain.luac`
+
+Optionally assign `VBgps.luac` to another screen.
 
 ---
 
 ## Timers
+<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/bc7ff1c0-5dda-4699-a49b-b5ce0e6b2a01" />
 
-Configure timers on the **SETUP** page of the model.
+Flight timers must be configured in the model **SETUP** page of EdgeTX.
 
-<img width="256" height="128" alt="Timers" src="https://github.com/user-attachments/assets/fe4a465a-3da7-482a-9c8f-fdb40bf437f9" />
+The script reads and displays timer data from the radio.
 
 ---
 
-## Restrictions & Usage Policy
+## Restrictions and Usage Policy
 
-**Important:**  
-The script is strictly prohibited for launching drones **from**:
+Use of this project is prohibited by the author's policy for launches from:
 
-- russia  
-- belarus  
-- iran  
-- north korea  
-- temporarily occupied territories of Ukraine  
+russia, belarus, iran, north korea, syria, iraq, afghanistan, yemen, kazakhstan, turkmenistan, uzbekistan, kyrgyzstan, tajikistan, china, mongolia, myanmar, eritrea, ethiopia, somalia, south sudan, sudan, libya, chad, niger, mali, burkina faso, guinea, democratic republic of congo, congo, zimbabwe, cuba, nicaragua, venezuela, temporarily occupied territories of ukraine.
 
-Using the script **from other territories** while flying *toward these areas* is not technically restricted.  
-This reflects the author's ethical stance.  
+This reflects the author's ethical position.
+
 The author assumes no responsibility for misuse.
+
+---
+
+## Safety Notice
+
+This project is **not a certified safety system**.
+
+It does not replace:
+
+- pilot training  
+- legal compliance  
+- failsafe configuration  
+- Return-to-Home logic  
+- visual awareness  
+
+Always verify telemetry and system behavior before real flight.
 
 ---
 
 ## Support the Project
 
-If VB Telemetry helps you and you want to support further development, choose one of the options below.
+If you want to support development:
 
-### 🇺🇦 For users in Ukraine (Monobank)
-Monobank accepts donations **only from Ukrainian bank cards**.
+### Ukraine (Monobank)
 
 https://send.monobank.ua/jar/7VF9b8mPJj
 
-[![Monobank](https://img.shields.io/badge/Donate-Monobank-black?style=for-the-badge)](https://send.monobank.ua/jar/7VF9b8mPJj)
-
 ---
 
-### 🌍 For international supporters (Patreon)
-
-Patreon works worldwide and supports all major payment methods.
+### International (Patreon)
 
 https://patreon.com/VBtelemetry
 
-[![Patreon](https://img.shields.io/badge/Support-Patreon-orange?style=for-the-badge&logo=patreon)](https://patreon.com/VBtelemetry)
+---
+
+## Telegram
+
+Project updates:
+
+https://t.me/VBtelemetry
 
 ---
 
-## Summary
+## Download
 
-**VB Telemetry** is a complete, high-performance telemetry toolkit for EdgeTX monochrome radios:  
-main screen, GPS navigation, statistics, GPX logging, QR generator, and full blind-flying capability.
+Latest release:
 
-[DOWNLOAD](https://github.com/And2Ex/VBtelemetry/releases/tag/v26.02.11-beta)
+https://github.com/And2Ex/VBtelemetry/releases/tag/v26.03.09-beta
