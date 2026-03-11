@@ -20,7 +20,7 @@ The interface focuses on:
 - blind-flying support  
 - minimal screen clutter  
 - statistics and GPX logging
-- 
+
 <img width="auto" height="500" alt="image" src="https://github.com/user-attachments/assets/5e52bfcc-bda3-4f6c-adea-19acede7cd29" />   <img width="auto" height="500" alt="image" src="https://github.com/user-attachments/assets/d2451c23-a7eb-4f91-b44b-3bbf9660e41f" />
 
 
