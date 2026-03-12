@@ -67,6 +67,17 @@ Signal direction is separated:
 - **left side** — radio → drone  
 - **right side** — drone → radio  
 
+Each antenna block combines several signal indicators in one compact visual element:
+
+- **outer step bars** show **Link Quality**  
+- **larger main bars** show signal strength in **dBm**  
+- **darkened lower bars** represent **SNR**, drawn this way to visually show the noise level relative to the useful signal  
+
+The main screen also shows:
+
+- TX power as compact step bars, from **0W / PIT mode** up to **2W**  
+- RFMD / packet rate as step bars based on frequency: **higher frequency = shorter bars**  
+
 ARM, TURTLE and BEEPER states are read from EdgeTX switches.
 
 ---
@@ -85,6 +96,15 @@ It displays:
 - GPS speed  
 - satellites count  
 - live coordinates  
+
+This screen also includes compact signal indicators for:
+
+- signal levels  
+- transmit power  
+- packet rate / RFMD  
+
+Before the first ARM, altitude is shown as **MSL / SL** (above mean sea level).
+After ARM, altitude switches to **AGL / AG** relative to the saved Home point.
 
 Even without video feed the pilot can still see:
 
@@ -351,4 +371,4 @@ https://t.me/VBtelemetry
 
 Latest release:
 
-https://github.com/And2Ex/VBtelemetry/releases/tag/v26.03.09-beta
+https://github.com/And2Ex/VBtelemetry/releases/tag/v26.03.12-beta
