@@ -218,10 +218,7 @@ This **does not replace** failsafe systems or safe flight procedures.
 The script allows fast switching between telemetry screens.
 
 To switch screens quickly:
-
-```
 Double press ENTER
-```
 
 Pressing **ENTER twice quickly** toggles between available telemetry screens.
 
@@ -346,6 +343,20 @@ Always verify telemetry and system behavior before real flight.
 ## Support the Project
 
 If you want to support development:
+
+
+Supporting this project helps continued development of VB Telemetry.
+
+Your support allows:
+
+- improving the current monochrome version
+- fixing bugs and optimizing performance
+- adding new telemetry features
+- developing a more advanced version designed for EdgeTX radios with color displays
+
+The color display version will allow more complex interfaces, additional telemetry visualizations and extended functionality that are not possible on small monochrome screens.
+
+Note: a portion of donations may also be used to support Ukraine and the Armed Forces of Ukraine.
 
 ### Ukraine (Monobank)
 
