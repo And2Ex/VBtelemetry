@@ -23,12 +23,13 @@ The interface focuses on:
 
 <img width="auto" height="500" alt="image" src="https://github.com/user-attachments/assets/5e52bfcc-bda3-4f6c-adea-19acede7cd29" />   <img width="auto" height="500" alt="image" src="https://github.com/user-attachments/assets/d2451c23-a7eb-4f91-b44b-3bbf9660e41f" />
 
-
 ---
 
 ## Beta Status
 
-**Important:** this is a **beta build**.
+**Important:** this is currently a **free beta build**.
+
+At this stage, all features are available **free of charge** while the project is still in beta.
 
 The script **has not been tested on real drones by the author**, because the author currently does not have drones available for live testing.
 
@@ -39,6 +40,12 @@ Because of this:
 - use it at your own risk  
 - expect possible bugs or telemetry edge cases  
 - verify all functions carefully before real flight  
+
+The project is also currently distributed in **precompiled form only**.
+
+Due to the very limited Lua memory available on small monochrome EdgeTX radios, the script currently works reliably only when precompiled.
+
+The **source code is planned to be published later**, after the beta stage and memory-sensitive parts of the project are finalized.
 
 ---
 
@@ -103,7 +110,7 @@ This screen also includes compact signal indicators for:
 - transmit power  
 - packet rate / RFMD  
 
-Before the first ARM, altitude is shown as **MSL / SL** (above mean sea level).
+Before the first ARM, altitude is shown as **MSL / SL** (above mean sea level).  
 After ARM, altitude switches to **AGL / AG** relative to the saved Home point.
 
 Even without video feed the pilot can still see:
@@ -217,7 +224,7 @@ This **does not replace** failsafe systems or safe flight procedures.
 
 The script allows fast switching between telemetry screens.
 
-To switch screens quickly:
+To switch screens quickly:  
 Double press ENTER
 
 Pressing **ENTER twice quickly** toggles between available telemetry screens.
@@ -249,7 +256,7 @@ The settings page allows configuration of:
 - **Turtle switch**  
 - **Beeper switch**  
 - **Units**  
-- **Invert UI**
+- **Invert UI**  
 
 For radios with inverted OLED displays you can enable **Invert UI** so the interface is rendered correctly.
 
@@ -269,9 +276,11 @@ VB Telemetry is designed for radios with:
 
 EdgeTX monochrome radios have very limited Lua memory.
 
-Because of this, some features require enough free RAM.
+Because of this, the current beta is distributed as a **precompiled build**.
 
-These features include:
+At the moment this is necessary for stable operation on constrained hardware.
+
+These features are especially memory-sensitive:
 
 - **Statistics**
 - **GPX logging**
@@ -343,7 +352,6 @@ Always verify telemetry and system behavior before real flight.
 ## Support the Project
 
 If you want to support development:
-
 
 Supporting this project helps continued development of VB Telemetry.
 
