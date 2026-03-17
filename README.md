@@ -21,15 +21,14 @@ The interface focuses on:
 - minimal screen clutter  
 - statistics and GPX logging
 
-<img width="auto" height="500" alt="image" src="https://github.com/user-attachments/assets/5e52bfcc-bda3-4f6c-adea-19acede7cd29" />   <img width="auto" height="500" alt="image" src="https://github.com/user-attachments/assets/d2451c23-a7eb-4f91-b44b-3bbf9660e41f" />
-
 ---
 
 ## Beta Status
 
-**Important:** this is currently a **free beta build**.
+**VB Telemetry** is currently available in two beta versions:
 
-At this stage, all features are available **free of charge** while the project is still in beta.
+- **Lite** — open-source lightweight version with only the main telemetry screen
+- **Full Beta** — full-feature beta version, currently available **free of charge**
 
 The script **has not been tested on real drones by the author**, because the author currently does not have drones available for live testing.
 
@@ -41,11 +40,43 @@ Because of this:
 - expect possible bugs or telemetry edge cases  
 - verify all functions carefully before real flight  
 
-The project is also currently distributed in **precompiled form only**.
+---
 
-Due to the very limited Lua memory available on small monochrome EdgeTX radios, the script currently works reliably only when precompiled.
+## Download
 
-The **source code is planned to be published later**, after the beta stage and memory-sensitive parts of the project are finalized.
+### [VB TELEMETRY LITE — v26.03.17-beta_lite](https://github.com/And2Ex/VBtelemetry/releases/tag/v26.03.17-beta_lite)
+
+Lite version includes:
+
+- main telemetry screen only
+- minimal memory usage
+- open-source source code
+
+The Lite source code in this repository is provided as `.lua` files.
+
+Before running Lite from repository source, you need to precompile the files inside the `VBlib` folder:
+
+1. Open the radio file manager
+2. Go to the `VBlib` folder
+3. Run each file there one by one so EdgeTX compiles them to `.luac`
+4. Reboot the radio
+5. Start `VBtlm`
+
+In the **Lite release archive**, the compiled files are already included.
+
+---
+
+### [VB TELEMETRY FULL — v26.03.12-beta](https://github.com/And2Ex/VBtelemetry/releases/tag/v26.03.12-beta)
+
+Full Beta version includes:
+
+- main telemetry screen
+- GPS screen
+- coordinates QR generator
+- GPX track logging
+- flight statistics
+
+This version is currently available free during beta.
 
 ---
 
@@ -276,7 +307,7 @@ VB Telemetry is designed for radios with:
 
 EdgeTX monochrome radios have very limited Lua memory.
 
-Because of this, the current beta is distributed as a **precompiled build**.
+Because of this, the current Full Beta is distributed as a **precompiled build**.
 
 At the moment this is necessary for stable operation on constrained hardware.
 
@@ -297,6 +328,8 @@ This is a hardware limitation of small radios.
 ## Installation
 
 Extract the contents of the archive to the root of the SD card.
+
+For Lite source files from the repository, precompile the files in `VBlib` first as described in the **Download** section above.
 
 ---
 
@@ -383,11 +416,3 @@ https://patreon.com/VBtelemetry
 Project updates:
 
 https://t.me/VBtelemetry
-
----
-
-## Download
-
-Latest release:
-
-https://github.com/And2Ex/VBtelemetry/releases/tag/v26.03.12-beta
