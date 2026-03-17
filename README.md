@@ -83,7 +83,7 @@ This version is currently available free during beta.
 ## Main Features
 
 ### 1. Main Telemetry Screen
-<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/022a98c2-4926-4b94-96f1-8dadee11f62a" />
+<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/087d56b0-1d36-4f5e-8eb8-4d8d303bf4b0" />
 
 The main screen provides the most important flight data in a compact layout.
 
@@ -121,7 +121,7 @@ ARM, TURTLE and BEEPER states are read from EdgeTX switches.
 ---
 
 ### 2. GPS Screen
-<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/e314b506-a974-4443-8939-a003fdfdfcd5" />
+<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/69f026c8-96f4-4a70-85a7-8be0e243a972" />
 
 The GPS screen focuses on navigation.
 
@@ -159,7 +159,7 @@ Supports:
 ---
 
 ### 3. Coordinates QR Screen
-<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/b1ed967c-edde-44be-b890-b5fa37bd68e4" />
+<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/263dfe81-1f2e-4040-a7cb-1be6912cce73" />
 
 The script can generate a QR code from current coordinates.
 
@@ -221,6 +221,7 @@ Logged values may include:
 Logging starts on first ARM after Home is established and stops when Home is reset.
 
 #### Resetting Home
+<img width="256" height="128" alt="image" src="https://github.com/user-attachments/assets/c548978f-330d-4fb7-b2db-7c11cb3cea9f" />
 
 - Select **Reset Home** in script settings  
 - Replace drone battery  
