@@ -36,14 +36,16 @@ local M = {
   _focus = 1,
   _scroll = 0,
   _edit = false,
-  _ignore_until = 0,
-  _await_release = false,
   _menu_focus = 1,
-  _last_enter_t = -100000,
-  _last_exit_t = -100000,
   _dirty = false,
   _first_run = false,
   _pending = {},
+  _input = (UTIL and type(UTIL.new_input_latch) == "function") and UTIL.new_input_latch() or {
+    ignore_until = 0,
+    await_release = false,
+    last_enter_t = -100000,
+    last_exit_t = -100000,
+  },
 }
 
 local VISIBLE_ROWS = 4
@@ -92,21 +94,17 @@ end
 
 
 local function enter_ok()
-  local timestamp = now()
-  if (timestamp - M._last_enter_t) < 18 then
-    return false
+  if UTIL and type(UTIL.latch_enter_ok) == "function" then
+    return UTIL.latch_enter_ok(M._input, 18)
   end
-  M._last_enter_t = timestamp
   return true
 end
 
 
 local function exit_ok()
-  local timestamp = now()
-  if (timestamp - M._last_exit_t) < 12 then
-    return false
+  if UTIL and type(UTIL.latch_exit_ok) == "function" then
+    return UTIL.latch_exit_ok(M._input, 12)
   end
-  M._last_exit_t = timestamp
   return true
 end
 
@@ -290,10 +288,14 @@ function M.init(args)
   M._focus = 1
   M._scroll = 0
   M._edit = false
-  M._ignore_until = now() + 2
+  if UTIL and type(UTIL.latch_reset) == "function" then
+    UTIL.latch_reset(M._input, 2, true)
+  else
+    M._input.ignore_until = now() + 2
+    M._input.await_release = true
+  end
   M._menu_focus = tonumber(args.menu_focus or 1) or 1
   M._caller = args.from or "MAIN"
-  M._await_release = true
   M._dirty = false
   M._first_run = args.first_run and true or false
   M._pending = {}
@@ -303,7 +305,7 @@ end
 function M.on_unload()
   M._edit = false
   M._pending = {}
-  M._await_release = false
+  M._input.await_release = false
 
   if UTIL and type(UTIL.gc_full) == "function" then
     UTIL.gc_full()
@@ -314,18 +316,11 @@ end
 
 
 function M.run(event)
-  local e = event or 0
-
-  if now() <= (M._ignore_until or 0) then
-    e = 0
-  end
-
-  if M._await_release then
-    if e ~= 0 then
-      e = 0
-    else
-      M._await_release = false
-    end
+  local e
+  if UTIL and type(UTIL.latch_apply) == "function" then
+    e = UTIL.latch_apply(M._input, event)
+  else
+    e = event or 0
   end
 
   if UTIL.is_exit(e) and exit_ok() then
@@ -372,7 +367,6 @@ function M.run(event)
   if UTIL.is_enter(e) and enter_ok() and item then
     if item.kind == "toggle" then
       toggle_item(item.id)
-      M._await_release = true
     elseif item.kind == "switch" then
       if not M._edit then
         set_pending_switch(item.id, get_switch_value(item.id))
@@ -381,7 +375,6 @@ function M.run(event)
         commit_pending_switch(item.id)
         M._edit = false
       end
-      M._await_release = true
     end
   end
 

@@ -13,7 +13,7 @@ local MENU_STATE = "menu"
 local DONATE_STATE = "donate"
 local QR_STATE = "qr"
 
-local VERSION_SHORT = rawget(_G, "VB_APP_VERSION") or "v26.03.17-beta_lite"
+local VERSION_SHORT = rawget(_G, "VB_APP_VERSION") or "v26.03.20-beta_lite"
 local VISIBLE_ROWS = 4
 local LIST_Y_START = 12
 local LIST_Y_STEP = 11
@@ -28,8 +28,8 @@ local MENU_ITEMS = {
 -- Compact 29x29 QR payloads are stored as bitmaps to avoid runtime generation.
 
 local DONATE_ITEMS = {
-  { id = "patreon", label = "Patreon" },
-  { id = "mono", label = "Monobank" },
+  { id = "patreon", label = "Patreon (Global)" },
+  { id = "mono", label = "Monobank (UA)" },
   { id = "email", label = "Email" },
   { id = "telegram", label = "Telegram" },
 }
@@ -85,10 +85,12 @@ local M = {
   _scroll_donate = 0,
   _qr_id = nil,
   _qr_return_state = MENU_STATE,
-  _ignore_until = 0,
-  _await_release = false,
-  _last_enter_t = -100000,
-  _last_exit_t = -100000,
+  _input = (UTIL and type(UTIL.new_input_latch) == "function") and UTIL.new_input_latch() or {
+    ignore_until = 0,
+    await_release = false,
+    last_enter_t = -100000,
+    last_exit_t = -100000,
+  },
 }
 
 
@@ -114,46 +116,37 @@ end
 
 
 local function arm_release_latch(delay)
-  M._ignore_until = now() + (delay or 2)
-  M._await_release = true
+  if UTIL and type(UTIL.latch_arm_release) == "function" then
+    UTIL.latch_arm_release(M._input, delay or 2)
+    return
+  end
+
+  M._input.ignore_until = now() + (delay or 2)
+  M._input.await_release = true
 end
 
 
 local function enter_ok()
-  local timestamp = now()
-  if (timestamp - M._last_enter_t) < 18 then
-    return false
+  if UTIL and type(UTIL.latch_enter_ok) == "function" then
+    return UTIL.latch_enter_ok(M._input, 18)
   end
-  M._last_enter_t = timestamp
   return true
 end
 
 
 local function exit_ok()
-  local timestamp = now()
-  if (timestamp - M._last_exit_t) < 12 then
-    return false
+  if UTIL and type(UTIL.latch_exit_ok) == "function" then
+    return UTIL.latch_exit_ok(M._input, 12)
   end
-  M._last_exit_t = timestamp
   return true
 end
 
 
 local function apply_input_latch(event)
-  local e = event or 0
-
-  if now() <= (M._ignore_until or 0) then
-    e = 0
+  if UTIL and type(UTIL.latch_apply) == "function" then
+    return UTIL.latch_apply(M._input, event)
   end
-
-  if M._await_release then
-    if e ~= 0 then
-      return 0
-    end
-    M._await_release = false
-  end
-
-  return e
+  return event or 0
 end
 
 
@@ -353,8 +346,14 @@ function M.init(args)
   M._scroll_donate = 0
   M._qr_id = nil
   M._qr_return_state = MENU_STATE
-  M._last_enter_t = -100000
-  M._last_exit_t = -100000
+  if UTIL and type(UTIL.latch_reset) == "function" then
+    UTIL.latch_reset(M._input, 0, false)
+  else
+    M._input.ignore_until = 0
+    M._input.await_release = false
+    M._input.last_enter_t = -100000
+    M._input.last_exit_t = -100000
+  end
 
   normalize_focus()
   arm_release_latch(12)
@@ -367,7 +366,7 @@ function M.on_unload()
   M._scroll_donate = 0
   M._qr_id = nil
   M._qr_return_state = MENU_STATE
-  M._await_release = false
+  M._input.await_release = false
 
   if UTIL and type(UTIL.gc_light) == "function" then
     UTIL.gc_light()

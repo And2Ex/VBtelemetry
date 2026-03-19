@@ -15,6 +15,15 @@ local LCD_W = 128
 local LCD_H = 64
 local SETTINGS_FILE_PATH = "/LOGS/VB_settings.lua"
 
+local FAST_PERIOD = 8
+local MEDIUM_PERIOD = 24
+local STATE_PERIOD = 12
+local BAR_PERIOD = 24
+local CLOCK_PERIOD = 100
+
+local FAST_SENSORS = { "TQly", "TRSS", "TSNR", "RQly", "1RSS", "2RSS", "RSNR" }
+local MEDIUM_SENSORS = { "FM", "RxBt", "TPWR", "RFMD" }
+
 local UI = rawget(_G, "UI")
 if type(UI) ~= "table" then
   UI = {}
@@ -494,6 +503,82 @@ function UTIL.is_prev(event)
 end
 
 
+function UTIL.new_input_latch()
+  return {
+    ignore_until = 0,
+    await_release = false,
+    last_enter_t = -100000,
+    last_exit_t = -100000,
+  }
+end
+
+
+function UTIL.latch_reset(latch, delay, await_release)
+  latch = latch or UTIL.new_input_latch()
+  latch.ignore_until = UTIL.now() + (tonumber(delay or 0) or 0)
+  latch.await_release = not not await_release
+  latch.last_enter_t = -100000
+  latch.last_exit_t = -100000
+  return latch
+end
+
+
+function UTIL.latch_arm_release(latch, delay)
+  latch = latch or UTIL.new_input_latch()
+  latch.ignore_until = UTIL.now() + (tonumber(delay or 0) or 0)
+  latch.await_release = true
+  return latch
+end
+
+
+function UTIL.latch_apply(latch, event)
+  latch = latch or UTIL.new_input_latch()
+
+  local e = event or 0
+  if UTIL.now() <= (latch.ignore_until or 0) then
+    e = 0
+  end
+
+  if latch.await_release then
+    if e ~= 0 then
+      return 0
+    end
+    latch.await_release = false
+  end
+
+  return e
+end
+
+
+function UTIL.latch_enter_ok(latch, min_delta)
+  latch = latch or UTIL.new_input_latch()
+
+  local timestamp = UTIL.now()
+  local gap = tonumber(min_delta or 18) or 18
+  if (timestamp - (latch.last_enter_t or -100000)) < gap then
+    return false
+  end
+
+  latch.last_enter_t = timestamp
+  return true
+end
+
+
+function UTIL.latch_exit_ok(latch, min_delta)
+  latch = latch or UTIL.new_input_latch()
+
+  local timestamp = UTIL.now()
+  local gap = tonumber(min_delta or 12) or 12
+  if (timestamp - (latch.last_exit_t or -100000)) < gap then
+    return false
+  end
+
+  latch.last_exit_t = timestamp
+  return true
+end
+
+
+
 local function settings_path()
   local cached = rawget(_G, "VB_SETTINGS_PATH")
   if type(cached) == "string" and cached ~= "" then
@@ -669,6 +754,124 @@ function M.update_settings(patch)
 end
 
 
+
+
+local function read_tx_voltage()
+  local value = safe_get_value("tx-voltage")
+  if type(value) ~= "number" or value <= 0 then
+    return nil
+  end
+
+  if value > 20 and value < 200 then
+    value = value / 10
+  elseif value >= 200 and value < 2000 then
+    value = value / 100
+  end
+
+  return value
+end
+
+
+local function read_model_name()
+  if type(getModelName) == "function" then
+    local name = getModelName()
+    if type(name) == "string" and name ~= "" then
+      return name
+    end
+  end
+
+  if type(model) == "table" and type(model.getInfo) == "function" then
+    local info = model.getInfo()
+    if type(info) == "table" and type(info.name) == "string" and info.name ~= "" then
+      return info.name
+    end
+  end
+
+  return "Model"
+end
+
+
+local function read_timer_value(timer_index)
+  if not (model and type(model.getTimer) == "function") then
+    return 0
+  end
+
+  local timer = model.getTimer(timer_index - 1) or {}
+  if type(timer.value) == "number" then
+    return math.floor(timer.value)
+  end
+
+  return 0
+end
+
+
+local function read_timer_name(timer_index)
+  if not (model and type(model.getTimer) == "function") then
+    return "T" .. tostring(timer_index)
+  end
+
+  local timer = model.getTimer(timer_index - 1) or {}
+  local name = timer.name
+  if type(name) == "string" and name ~= "" then
+    return name
+  end
+
+  return "T" .. tostring(timer_index)
+end
+
+
+
+local function read_clock_value()
+  if type(getDateTime) ~= "function" then
+    return nil, nil
+  end
+
+  local dt = getDateTime() or {}
+  local hour = tonumber(dt.hour or 0) or 0
+  local minute = tonumber(dt.min or 0) or 0
+  return hour % 24, minute
+end
+
+
+local BAR_CACHE = rawget(_G, "VB_BAR_CACHE")
+if type(BAR_CACHE) ~= "table" then
+  BAR_CACHE = {}
+  rawset(_G, "VB_BAR_CACHE", BAR_CACHE)
+end
+
+
+local function update_bar_cache(timestamp, force)
+  if force or BAR_CACHE.model_name == nil then
+    BAR_CACHE.model_name = read_model_name()
+  end
+
+  if force or timestamp >= (BAR_CACHE.next_tx_voltage or 0) then
+    BAR_CACHE.tx_voltage = read_tx_voltage()
+    BAR_CACHE.next_tx_voltage = timestamp + BAR_PERIOD
+  end
+
+  if force or timestamp >= (BAR_CACHE.next_timers or 0) then
+    BAR_CACHE.timer1_name = read_timer_name(1)
+    BAR_CACHE.timer2_name = read_timer_name(2)
+    BAR_CACHE.timer1 = read_timer_value(1)
+    BAR_CACHE.timer2 = read_timer_value(2)
+    BAR_CACHE.next_timers = timestamp + BAR_PERIOD
+  end
+
+  if force or timestamp >= (BAR_CACHE.next_clock or 0) then
+    BAR_CACHE.clock_hour, BAR_CACHE.clock_min = read_clock_value()
+    BAR_CACHE.next_clock = timestamp + CLOCK_PERIOD
+  end
+end
+
+
+local function update_sensor_list(sensor_names)
+  for index = 1, #sensor_names do
+    M.gv(sensor_names[index])
+  end
+end
+
+
 local TLM_CACHE = rawget(_G, "VB_TLM_CACHE")
 if type(TLM_CACHE) ~= "table" then
   TLM_CACHE = {}
@@ -691,8 +894,27 @@ function M.gv(name)
 end
 
 
+function M.peek(name, default)
+  if type(name) ~= "string" or name == "" then
+    return default
+  end
+
+  local value = TLM_CACHE[name]
+  if value == nil then
+    return default
+  end
+
+  return value
+end
+
+
 function M.tlm_cache()
   return TLM_CACHE
+end
+
+
+function M.bar_cache()
+  return BAR_CACHE
 end
 
 
@@ -705,11 +927,11 @@ end
 
 
 function M.has_telemetry()
-  local lq = tonumber(M.gv("RQly"))
-  local tx_rssi = tonumber(M.gv("TRSS"))
-  local rx_rssi = tonumber(M.gv("1RSS"))
+  local lq = tonumber(M.peek("RQly"))
+  local tx_rssi = tonumber(M.peek("TRSS"))
+  local rx_rssi = tonumber(M.peek("1RSS"))
   if rx_rssi == nil then
-    rx_rssi = tonumber(M.gv("2RSS"))
+    rx_rssi = tonumber(M.peek("2RSS"))
   end
 
   if lq and lq > 0 then
@@ -725,30 +947,36 @@ function M.has_telemetry()
 end
 
 
-function M.update_tlm()
-  -- Keep the main-screen telemetry cache warm even while a menu is open.
-  M.gv("TQly")
-  M.gv("TRSS")
-  M.gv("TSNR")
-  M.gv("RQly")
-  M.gv("1RSS")
-  M.gv("2RSS")
-  M.gv("RSNR")
-  M.gv("FM")
-  M.gv("RxBt")
-  M.gv("TPWR")
-  M.gv("RFMD")
-
+function M.update_tlm(force)
   local state = rawget(_G, "VB_TLM_STATE")
   if type(state) ~= "table" then
     state = {}
     rawset(_G, "VB_TLM_STATE", state)
   end
 
-  state.telemetry_ok = M.has_telemetry()
-  state.last_armed = M.is_armed()
-  rawset(_G, "VB_ARMED", state.last_armed)
-  return state.telemetry_ok
+  local timestamp = UTIL.now()
+  force = force == true
+
+  if force or timestamp >= (state.next_fast or 0) then
+    update_sensor_list(FAST_SENSORS)
+    state.next_fast = timestamp + FAST_PERIOD
+  end
+
+  if force or timestamp >= (state.next_medium or 0) then
+    update_sensor_list(MEDIUM_SENSORS)
+    state.next_medium = timestamp + MEDIUM_PERIOD
+  end
+
+  update_bar_cache(timestamp, force)
+
+  if force or timestamp >= (state.next_state or 0) or state.telemetry_ok == nil then
+    state.telemetry_ok = M.has_telemetry()
+    state.last_armed = M.is_armed()
+    state.next_state = timestamp + STATE_PERIOD
+    rawset(_G, "VB_ARMED", state.last_armed)
+  end
+
+  return state.telemetry_ok == true
 end
 
 

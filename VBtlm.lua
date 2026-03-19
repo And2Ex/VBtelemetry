@@ -3,7 +3,7 @@
 -- Source files in this repository target compiled `.luac` modules at runtime.
 
 local APP_NAME = "VB Telemetry Lite"
-local APP_VERSION = "v26.03.17-beta_lite"
+local APP_VERSION = "v26.03.20-beta_lite"
 
 local app = {}
 
@@ -293,6 +293,10 @@ function app.run(event)
     queued_screen = nil
     load_screen(next_screen.name, next_screen.args)
     return 0
+  end
+
+  if not current_screen.mod then
+    app.init()
   end
 
   if not (current_screen.mod and type(current_screen.mod.run) == "function") then

@@ -23,6 +23,7 @@ local util_src_val = UTIL.src_val
 local util_gc_light = UTIL.gc_light
 local util_is_enter = UTIL.is_enter
 local util_is_exit = UTIL.is_exit
+local util_new_input_latch = UTIL.new_input_latch
 local BARS_MODULE_PATH = (rawget(_G, "VB_LIB_DIR") or "VBlib") .. "/bars.luac"
 
 local function src_val(src)
@@ -459,6 +460,9 @@ end
 -- Must be declared BEFORE read_* helpers below.
 
 local function gv(name)
+  if CORE and type(CORE.peek) == "function" then
+    return CORE.peek(name)
+  end
   if CORE and type(CORE.gv) == "function" then
     return CORE.gv(name)
   end
@@ -856,10 +860,12 @@ function app.on_unload(_next_name)
     pcall(collectgarbage, "collect")
   end
 end
-local _ignore_until = 0
-local _await_release = true
-local _last_enter_t = -100000
-local _last_exit_t = -100000
+local _input_latch = util_new_input_latch and util_new_input_latch() or {
+  ignore_until = 0,
+  await_release = true,
+  last_enter_t = -100000,
+  last_exit_t = -100000,
+}
 
 local function _is_enter(e)
   return util_is_enter and util_is_enter(e)
@@ -871,18 +877,26 @@ end
 
 
 local function _enter_ok()
-  local t = _now()
-  if (t - _last_enter_t) < 18 then return false end
-  _last_enter_t = t
+  if UTIL and type(UTIL.latch_enter_ok) == "function" then
+    return UTIL.latch_enter_ok(_input_latch, 18)
+  end
   return true
 end
 
 
 local function _exit_ok()
-  local t = _now()
-  if (t - _last_exit_t) < 12 then return false end
-  _last_exit_t = t
+  if UTIL and type(UTIL.latch_exit_ok) == "function" then
+    return UTIL.latch_exit_ok(_input_latch, 12)
+  end
   return true
+end
+
+
+local function _apply_input_latch(event)
+  if UTIL and type(UTIL.latch_apply) == "function" then
+    return UTIL.latch_apply(_input_latch, event)
+  end
+  return event or 0
 end
 
 
@@ -910,8 +924,12 @@ function app.init(args)
     collectgarbage("step", 200)
   end
 
-  _ignore_until = _now() + 2
-  _await_release = true
+  if UTIL and type(UTIL.latch_reset) == "function" then
+    UTIL.latch_reset(_input_latch, 2, true)
+  else
+    _input_latch.ignore_until = _now() + 2
+    _input_latch.await_release = true
+  end
 end
 
 
@@ -928,26 +946,16 @@ function app.run(event)
 
   -- Refresh settings so UI changes, especially inversion, apply immediately.
   SET = rawget(_G, "SET") or SET
-  local e = event or 0
-  if _now() <= _ignore_until then
-    e = 0
-  end
-  if _await_release then
-    if e ~= 0 then
-      e = 0
-    else
-      _await_release = false
-    end
-  end
+  local e = _apply_input_latch(event)
   if _is_exit(e) and _exit_ok() then
     if util_gc_light then
       util_gc_light()
     end
-    _await_release = true
+    _input_latch.await_release = true
     return 0
   end
   if _is_enter(e) and _enter_ok() then
-    _await_release = true
+    _input_latch.await_release = true
     return { next_screen = "MENU", args = { from = "MAIN" } }
   end
   refresh_tlm()
@@ -989,7 +997,9 @@ function app.run(event)
 
           -- If MAIN was not opened while telemetry was alive, the per-screen cache may be empty.
           -- Pull last-known values from the shared telemetry cache maintained by CORE/background.
-          if fm == nil and CORE and type(CORE.gv) == "function" then
+          if fm == nil and CORE and type(CORE.peek) == "function" then
+            fm = CORE.peek("FM")
+          elseif fm == nil and CORE and type(CORE.gv) == "function" then
             fm = CORE.gv("FM")
             if is_valid_fm(fm) then
               last_main.fm = fm
@@ -997,7 +1007,9 @@ function app.run(event)
               fm = nil
             end
           end
-          if rxbt == nil and CORE and type(CORE.gv) == "function" then
+          if rxbt == nil and CORE and type(CORE.peek) == "function" then
+            rxbt = CORE.peek("RxBt")
+          elseif rxbt == nil and CORE and type(CORE.gv) == "function" then
             rxbt = CORE.gv("RxBt")
             if is_valid_rxbt(rxbt) then
               last_main.rxbt = rxbt
@@ -1069,8 +1081,7 @@ function app.run(event)
             if P.rx.lq  then UI.text(P.rx.lq,  "RQly") end
             if P.rx.snr then
               local sx, sy = UI.pos_xy(P.rx.snr)
-              -- Align RSNR label with the rest of the right column (only in this mode)
-              drawText(sx + 2, sy, "RSNR", (SMLSIZE or 0) + (CENTER or 0))
+              UI.text(sx + 2, sy, "RSNR", CENTER or 0)
             end
           end
         end

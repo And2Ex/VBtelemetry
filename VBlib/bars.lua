@@ -101,6 +101,14 @@ local function tx_voltage_percent(voltage)
 end
 
 
+local function bar_cache()
+  if CORE and type(CORE.bar_cache) == "function" then
+    return CORE.bar_cache()
+  end
+  return nil
+end
+
+
 local function draw_battery_icon(x, y, percent)
   local shown_percent = clamp(percent or 0, 0, 100)
   local inner_x = x + 1
@@ -145,14 +153,27 @@ end
 
 
 local function read_timer(timer_index)
+  local timer_name = "T" .. tostring(timer_index)
+  local cache = bar_cache()
+  if cache then
+    local cached_name = (timer_index == 1) and cache.timer1_name or cache.timer2_name
+    local cached_value = (timer_index == 1) and cache.timer1 or cache.timer2
+    if type(cached_name) == "string" and cached_name ~= "" then
+      timer_name = cached_name
+    end
+    if type(cached_value) == "number" then
+      return timer_name .. " " .. format_mmss(cached_value)
+    end
+  end
+
   if not (model and type(model.getTimer) == "function") then
-    return "T" .. tostring(timer_index) .. " 00:00"
+    return timer_name .. " 00:00"
   end
 
   local timer = model.getTimer(timer_index - 1) or {}
   local name = timer.name
-  if type(name) ~= "string" or name == "" then
-    name = "T" .. tostring(timer_index)
+  if type(name) == "string" and name ~= "" then
+    timer_name = name
   end
 
   local value = 0
@@ -160,7 +181,7 @@ local function read_timer(timer_index)
     value = math.floor(timer.value)
   end
 
-  return name .. " " .. format_mmss(value)
+  return timer_name .. " " .. format_mmss(value)
 end
 
 
@@ -184,20 +205,28 @@ end
 
 
 local function draw_clock()
-  if type(getDateTime) ~= "function" then
-    draw_small(CLOCK_X, BOTTOM_BAR_Y + 1, "--:--", CENTER + inverse_flags())
-    return
+  local cache = bar_cache()
+  local hour = cache and cache.clock_hour or nil
+  local minute = cache and cache.clock_min or nil
+
+  if hour == nil or minute == nil then
+    if type(getDateTime) ~= "function" then
+      draw_small(CLOCK_X, BOTTOM_BAR_Y + 1, "--:--", CENTER + inverse_flags())
+      return
+    end
+
+    local dt = getDateTime() or {}
+    hour = tonumber(dt.hour or 0) or 0
+    minute = tonumber(dt.min or 0) or 0
   end
 
-  local dt = getDateTime() or {}
-  local hour = tonumber(dt.hour or 0) or 0
-  local minute = tonumber(dt.min or 0) or 0
   draw_small(CLOCK_X, BOTTOM_BAR_Y + 1, two_digits(hour % 24) .. ":" .. two_digits(minute), CENTER + inverse_flags())
 end
 
 
 function BAR.setup()
-  BAR.model_name = read_model_name()
+  local cache = bar_cache()
+  BAR.model_name = (cache and cache.model_name) or read_model_name()
   BAR._ready = true
   return BAR
 end
@@ -205,9 +234,11 @@ end
 
 function BAR.draw_top()
   lcd.drawFilledRectangle(0, TOP_BAR_Y, 128, 8, 0)
-  draw_small(MODEL_X, TOP_BAR_Y + 1, BAR.model_name or read_model_name(), inverse_flags())
+  local cache = bar_cache()
+  local model_name = (cache and cache.model_name) or BAR.model_name or read_model_name()
+  draw_small(MODEL_X, TOP_BAR_Y + 1, model_name, inverse_flags())
 
-  local voltage = read_tx_voltage()
+  local voltage = (cache and cache.tx_voltage) or read_tx_voltage()
   local text = "--.-V"
   if voltage then
     local blink_on = ((getTime() // 64) % 2) == 0
