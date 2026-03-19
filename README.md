@@ -44,7 +44,7 @@ Because of this:
 
 ## Download
 
-### [VB TELEMETRY LITE — v26.03.17-beta_lite](https://github.com/And2Ex/VBtelemetry/releases/tag/v26.03.17-beta_lite)
+### [VB TELEMETRY LITE — v26.03.20-beta_lite](https://github.com/And2Ex/VBtelemetry/releases/tag/v26.03.20-beta_lite)
 
 Lite version includes:
 
