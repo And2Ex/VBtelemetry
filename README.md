@@ -66,7 +66,7 @@ In the **Lite release archive**, the compiled files are already included.
 
 ---
 
-### [VB TELEMETRY FULL — v26.03.12-beta](https://github.com/And2Ex/VBtelemetry/releases/tag/v26.03.12-beta)
+### [VB TELEMETRY FULL — v26.03.20-beta_full](https://github.com/And2Ex/VBtelemetry/releases/tag/v26.03.20-beta_full)
 
 Full Beta version includes:
 
