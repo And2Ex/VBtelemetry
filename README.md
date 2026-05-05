@@ -301,6 +301,7 @@ VB Telemetry is designed for radios with:
 - **EdgeTX firmware**
 - **128×64 monochrome display**
 - **ELRS internal or external module**
+- **Supports EdgeTX 2.11.4 and newer**
 
 ---
 
